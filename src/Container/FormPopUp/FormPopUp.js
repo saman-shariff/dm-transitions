@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Button, Form, Container, Header } from 'semantic-ui-react';
+import { Button, Form } from 'semantic-ui-react';
 import axios from 'axios';
 import './FormPopUp.css';
-import { cloneDeep, isEmpty } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { formFields, mandatoryFields } from './InitData';
 
 function FormPopUp() {
@@ -22,29 +22,29 @@ function FormPopUp() {
         console.log('payload: ', payload);
 
         /** checking validation here itself */
-        if (isEmpty(payload.firstName) || isEmpty(payload.mobileNumber) ||
-            isEmpty(payload.email) || isEmpty(payload.companyName) || isEmpty(payload.companyWebsite)) {
-            payload['showError'] = 'This field is required';
-            console.log("why>");
-        } else {
-            payload['showError'] = '';
-            console.log("why> not>>>");
-        }
-        setState((prev) => ({
-            ...prev,
-            ...payload
-        }));
+        // if (isEmpty(payload.firstName) || isEmpty(payload.mobileNumber) ||
+        //     isEmpty(payload.email) || isEmpty(payload.companyName) || isEmpty(payload.companyWebsite)) {
+        //     payload['showError'] = 'This field is required';
+        //     console.log("why>");
+        // } else {
+        //     payload['showError'] = '';
+        //     console.log("why> not>>>");
+        // }
+        // setState((prev) => ({
+        //     ...prev,
+        //     ...payload
+        // }));
 
 
-        // axios.post(
-        //     'https://sheet.best/api/sheets/3003adcd-6a59-49b4-9da8-afdbdf59362f',
-        //     payload,
-        // ).then((response) => {
-        //     console.log("GoogleAPI-Success", response);
-        //     setState((prev) => ({ ...prev }));
-        // }).catch(e => {
-        //     console.error("GoogleAPI-Error", e);
-        // });
+        axios.post(
+            'https://sheet.best/api/sheets/3003adcd-6a59-49b4-9da8-afdbdf59362f',
+            payload,
+        ).then((response) => {
+            console.log("GoogleAPI-Success", response);
+            setState((prev) => ({ ...prev }));
+        }).catch(e => {
+            console.error("GoogleAPI-Error", e);
+        });
     };
 
     const handleSetValues = (e, inputFieldName) => {
