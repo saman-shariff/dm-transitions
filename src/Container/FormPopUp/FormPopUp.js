@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Button, Form, Container, Header } from 'semantic-ui-react';
 import axios from 'axios';
 import './FormPopUp.css';
-import { cloneDeep } from 'lodash';
-import { formFields } from './InitData';
+import { cloneDeep, isEmpty } from 'lodash';
+import { formFields, mandatoryFields } from './InitData';
 
 function FormPopUp() {
     const [state, setState] = useState({
@@ -13,25 +13,44 @@ function FormPopUp() {
         "email": "",
         "companyName": "",
         "companyWebsite": "",
+        "showError": "",
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
         const payload = cloneDeep(state);
-        axios.post(
-            'https://sheet.best/api/sheets/3003adcd-6a59-49b4-9da8-afdbdf59362f',
-            payload,
-        ).then((response) => {
-            console.log("GoogleAPI-Success", response);
-            setState((prev) => ({ ...prev }));
-        }).catch(e => {
-            console.error("GoogleAPI-Error", e);
-        });
+        console.log('payload: ', payload);
+
+        /** checking validation here itself */
+        if (isEmpty(payload.firstName) || isEmpty(payload.mobileNumber) ||
+            isEmpty(payload.email) || isEmpty(payload.companyName) || isEmpty(payload.companyWebsite)) {
+            payload['showError'] = 'This field is required';
+            console.log("why>");
+        } else {
+            payload['showError'] = '';
+            console.log("why> not>>>");
+        }
+        setState((prev) => ({
+            ...prev,
+            ...payload
+        }));
+
+
+        // axios.post(
+        //     'https://sheet.best/api/sheets/3003adcd-6a59-49b4-9da8-afdbdf59362f',
+        //     payload,
+        // ).then((response) => {
+        //     console.log("GoogleAPI-Success", response);
+        //     setState((prev) => ({ ...prev }));
+        // }).catch(e => {
+        //     console.error("GoogleAPI-Error", e);
+        // });
     };
 
     const handleSetValues = (e, inputFieldName) => {
         const modifiedInput = cloneDeep(state);
         modifiedInput[inputFieldName] = e.target.value;
+
         setState((prev) => ({
             ...prev,
             ...modifiedInput
@@ -39,25 +58,43 @@ function FormPopUp() {
     }
 
     return (
-        <Container fluid className="container">
-            <Header as="h2">Book Intro Call</Header>
-            <Form className="form">
-                {formFields.map(ele => {
-                    return (
-                        <Form.Field key={ele.value}>
-                            <label>{ele.label}</label>
-                            <input
-                                placeholder={ele.placeholder}
-                                onChange={(e) => handleSetValues(e, ele.value)}
-                            />
-                        </Form.Field>
-                    )
-                })}
-                <Button color="blue" type="submit" onClick={handleSubmit}>
-                    Submit
-                </Button>
-            </Form>
-        </Container>
+        <>
+            <div className="popupBox">
+                <div className="box">
+                    <span className="close-icon" onClick="">X</span>
+                    <h4 className='fontFamily headingDecor' style={{ marginBottom: "2rem" }}>Book Intro Call</h4>
+                    <Form className="form">
+                        {formFields.map(ele => {
+                            return (
+                                <Form.Field key={ele.value} style={{ marginBottom: "1rem" }}>
+                                    <label className='subHeadingDecor'>{ele.label}
+                                        {mandatoryFields.includes(ele.value)
+                                            ? <span style={{ color: "red" }}>*</span> : null}
+                                    </label>
+                                    <br />
+                                    <input
+                                        placeholder={ele.placeholder}
+                                        onChange={(e) => handleSetValues(e, ele.value)}
+                                        onPaste={(e) => handleSetValues(e, ele.value)}
+                                        className={"inputWidth"}
+                                    />
+                                    {mandatoryFields.includes(ele.value)
+                                        && state.showError && <>
+                                            <br />
+                                            <span className='errorLine'>{state.showError}</span>
+                                        </>
+                                    }
+
+                                </Form.Field>
+                            )
+                        })}
+                        <Button className='blue' type="submit" onClick={handleSubmit}>
+                            Submit
+                        </Button>
+                    </Form>
+                </div>
+            </div>
+        </>
     );
 }
 

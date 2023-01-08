@@ -31,6 +31,8 @@ export const formFields = [
     }
 ];
 
+export const mandatoryFields = ["firstName", "mobileNumber", "email", "companyName", "companyWebsite"];
+
 export const growthStages = [
     {
         heading: "Finding Opportunities",

@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import FormPopUp from './Container/FormPopUp/FormPopUp';
 import { growthStages } from './Container/FormPopUp/InitData';
 import { cloneDeep } from 'lodash';
-import logo from './assets/icons/logo.svg';
+import logo from './assets/icons/agencyIcon.svg';
 
 function App() {
   const [state, setState] = useState({
