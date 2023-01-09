@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Form } from 'semantic-ui-react';
 import axios from 'axios';
 import './FormPopUp.css';
-import { cloneDeep } from 'lodash';
-import { formFields, mandatoryFields } from './InitData';
+import { cloneDeep, isEmpty } from 'lodash';
+import { formFields, mandatoryFields, mobileNumberRegex, emailRegex } from './InitData';
 
-function FormPopUp() {
+function FormPopUp(props) {
     const [state, setState] = useState({
         "firstName": "",
         "lastName": "",
@@ -14,37 +14,40 @@ function FormPopUp() {
         "companyName": "",
         "companyWebsite": "",
         "showError": "",
+        "showErrorField": "",
+        "successResponse": false,
     });
 
     const handleSubmit = (e) => {
         e.preventDefault();
         const payload = cloneDeep(state);
-        console.log('payload: ', payload);
+        console.log('post payload: ', payload);
 
-        /** checking validation here itself */
-        // if (isEmpty(payload.firstName) || isEmpty(payload.mobileNumber) ||
-        //     isEmpty(payload.email) || isEmpty(payload.companyName) || isEmpty(payload.companyWebsite)) {
-        //     payload['showError'] = 'This field is required';
-        //     console.log("why>");
-        // } else {
-        //     payload['showError'] = '';
-        //     console.log("why> not>>>");
-        // }
-        // setState((prev) => ({
-        //     ...prev,
-        //     ...payload
-        // }));
+        if (mobileNumberRegex.test(payload.mobileNumber) && emailRegex.test(payload.email)) {
+            payload['showError'] = '';
+            payload['showErrorField'] = "";
 
+            axios.post(
+                'https://sheet.best/api/sheets/3003adcd-6a59-49b4-9da8-afdbdf59362f',
+                payload,
+            ).then((response) => {
+                console.log("GoogleAPI-Success", response);
+                setState((prev) => ({ ...prev, successResponse: true }));
+            }).catch(e => {
+                console.error("GoogleAPI-Error", e);
+            });
+        } else if (!mobileNumberRegex.test(payload.mobileNumber)) {
+            payload['showError'] = 'This field does not match regex pattern.';
+            payload['showErrorField'] = "mobileNumber";
+        } else if (!emailRegex.test(payload.email)) {
+            payload['showError'] = 'This field does not match regex pattern.';
+            payload['showErrorField'] = "email";
+        }
 
-        axios.post(
-            'https://sheet.best/api/sheets/3003adcd-6a59-49b4-9da8-afdbdf59362f',
-            payload,
-        ).then((response) => {
-            console.log("GoogleAPI-Success", response);
-            setState((prev) => ({ ...prev }));
-        }).catch(e => {
-            console.error("GoogleAPI-Error", e);
-        });
+        setState((prev) => ({
+            ...prev,
+            ...payload
+        }));
     };
 
     const handleSetValues = (e, inputFieldName) => {
@@ -57,19 +60,31 @@ function FormPopUp() {
         }));
     }
 
+    const enableCondition = isEmpty(state.firstName) || isEmpty(state.mobileNumber)
+        || isEmpty(state.email) || isEmpty(state.companyName)
+        || isEmpty(state.companyWebsite)
+
+    useEffect(() => {
+        if (state.successResponse) {
+            setTimeout(() => {
+                props.closePopup();
+            }, 1000);
+        }
+    }, [state.successResponse]);
+
     return (
         <>
             <div className="popupBox">
                 <div className="box">
-                    <span className="close-icon" onClick="">X</span>
+                    <span className="close-icon" onClick={props.closePopup}>X</span>
                     <h4 className='fontFamily headingDecor' style={{ marginBottom: "2rem" }}>Book Intro Call</h4>
                     <Form className="form">
                         {formFields.map(ele => {
                             return (
-                                <Form.Field key={ele.value} style={{ marginBottom: "1rem" }}>
+                                <Form.Field key={ele.value} style={{ marginBottom: "1.5rem" }}>
                                     <label className='subHeadingDecor'>{ele.label}
                                         {mandatoryFields.includes(ele.value)
-                                            ? <span style={{ color: "red" }}>*</span> : null}
+                                            ? <span style={{ color: "red" }}>&nbsp;*</span> : null}
                                     </label>
                                     <br />
                                     <input
@@ -77,9 +92,11 @@ function FormPopUp() {
                                         onChange={(e) => handleSetValues(e, ele.value)}
                                         onPaste={(e) => handleSetValues(e, ele.value)}
                                         className={"inputWidth"}
+                                        value={state[ele.value]}
                                     />
                                     {mandatoryFields.includes(ele.value)
-                                        && state.showError && <>
+                                        && ele.value === state.showErrorField &&
+                                        <>
                                             <br />
                                             <span className='errorLine'>{state.showError}</span>
                                         </>
@@ -88,9 +105,17 @@ function FormPopUp() {
                                 </Form.Field>
                             )
                         })}
-                        <Button className='blue' type="submit" onClick={handleSubmit}>
+                        <Button className={!enableCondition ? 'blue' : 'grey'} type="submit"
+                            disabled={enableCondition}
+                            onClick={handleSubmit}>
                             Submit
                         </Button>
+                        {state.successResponse &&
+                            <>
+                                <br />
+                                <span className='successLine'>Form submitted successfully!</span>
+                            </>
+                        }
                     </Form>
                 </div>
             </div>

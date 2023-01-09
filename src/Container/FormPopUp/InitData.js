@@ -47,3 +47,7 @@ export const growthStages = [
         description: 'Review data and adjust for real business impact'
     }
 ]
+
+export const mobileNumberRegex = new RegExp("^([+][9][1]|[9][1]|[0]){0,1}([ ]{0,1})([0-9]{1})([0-9]{9})$");
+
+export const emailRegex = new RegExp("^\\S+@\\S+\\.\\S+$");

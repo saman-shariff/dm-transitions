@@ -52,7 +52,7 @@
 }
 
 .headingDecor {
-    text-decoration: dashed;
+    text-decoration: underline;
 }
 
 .inputWidth {
@@ -70,13 +70,29 @@
     font-size: 12px;
 }
 
+.successLine {
+    color: green;
+    font-size: 12px;
+}
+
 .blue {
     border: 0px;
     padding: 5px 10px;
-    background-color: #1e90ff;
+    background-color: var(--logo);
     color: #FFFFFF;
     font-size: 14px;
     border-radius: 4px;
     font-weight: 500;
     cursor: pointer;
+}
+
+.grey {
+    border: 0px;
+    padding: 5px 10px;
+    background-color: grey;
+    color: #FFFFFF;
+    font-size: 14px;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: not-allowed;
 }
